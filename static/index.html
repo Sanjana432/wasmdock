@@ -69,7 +69,7 @@
             <textarea id="stdin" class="stdin-input" spellcheck="false" placeholder="Text to pass to the plugin"></textarea>
             <h3 class="limits-heading">Execution budget</h3>
             <div class="limits-grid">
-              <label class="limit-control"><span>Instruction fuel</span><input id="fuel" type="number" min="1000" max="50000000" step="1000" value="1000000"></label>
+              <label class="limit-control"><span>Instruction fuel</span><input id="fuel" type="number" min="1000" max="50000000" step="1" value="1000000"></label>
               <label class="limit-control"><span>Linear memory</span><div class="unit-field"><input id="memory" type="number" min="1" max="64" step="1" value="16"><span>MiB</span></div></label>
               <label class="limit-control"><span>Execution timeout</span><div class="unit-field"><input id="timeout" type="number" min="100" max="5000" step="1" value="2000"><span>ms</span></div></label>
               <label class="limit-control"><span>Output budget</span><div class="unit-field"><input id="output-limit" type="number" min="128" max="65536" step="1" value="16384"><span>bytes</span></div></label>

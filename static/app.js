@@ -139,7 +139,7 @@
     if (sample) {
       $('wat').value = sample.wat || ''; $('stdin').value = sample.default_stdin || '';
       text('sample-description', sample.description || 'A real Wasmtime execution sample.');
-      if (/file|denied|capability/i.test(sample.id)) $('workspace-permission').checked = false;
+      if (sample.id === 'workspace-read') $('workspace-permission').checked = false;
     } else text('sample-description', 'Write a WASI-compatible command module exporting _start. Resource limits still apply.');
   }
   async function loadSamples() {
@@ -188,8 +188,13 @@
       wat, stdin: $('stdin').value, fuel: Number($('fuel').value), memory_mb: Number($('memory').value),
       timeout_ms: Number($('timeout').value), output_limit: Number($('output-limit').value), workspace: $('workspace-permission').checked
     };
-    if (![payload.fuel, payload.memory_mb, payload.timeout_ms, payload.output_limit].every(n => Number.isInteger(n) && n > 0)) {
-      notice('Execution budgets must be positive whole numbers.'); return;
+    for (const id of ['fuel', 'memory', 'timeout', 'output-limit']) {
+      const input = $(id);
+      if (!input.checkValidity() || !Number.isInteger(input.valueAsNumber)) {
+        notice('Enter a whole number between ' + input.min + ' and ' + input.max + ' for ' + input.labels[0].innerText.split('\n')[0] + '.');
+        input.focus();
+        return;
+      }
     }
     state.busy = true; $('run-button').disabled = true; text('run-label', 'Submitting…'); notice('');
     const tenant = state.tenant;

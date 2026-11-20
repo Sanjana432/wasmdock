@@ -43,7 +43,14 @@ def main():
         results = [scheduler.wait(tenant,job["id"],timeout=60) for tenant,job in jobs]
         elapsed = perf_counter()-started
         scheduler.close()
-    assert all(r["status"] == "succeeded" for r in results)
+    failures = [{"status": r["status"], "reason": r["reason"], "error": r.get("error", ""),
+                 "metrics": r.get("metrics", {})} for r in results if r["status"] != "succeeded"]
+    if failures:
+        path = Path(args.output)
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(json.dumps({"platform": platform.platform(), "runs": args.runs,
+                                    "failures": failures}, indent=2)+"\n", encoding="utf-8", newline="\n")
+        raise RuntimeError("Benchmark child execution failed: "+json.dumps(failures))
     checks = {}
     for sample in ("infinite-loop", "memory-grow", "workspace-read", "output-flood"):
         result = execute(JobSpec(sample_id=sample, fuel=50_000, output_limit=256))

@@ -148,7 +148,11 @@ class Scheduler:
                 timeout=spec.timeout_ms/1000+2, check=False,
                 creationflags=subprocess.CREATE_NO_WINDOW if sys.platform == "win32" else 0)
             if completed.returncode or len(completed.stdout) > 450_000:
-                return {"status":"failed", "reason":"worker_error", "error":"The child process did not return a valid result.", "output":"", "stderr":"", "metrics":{}, "events":["Worker exited unexpectedly."]}
+                diagnostic = completed.stderr.decode("utf-8", errors="replace")[-1500:]
+                return {"status":"failed", "reason":"worker_error",
+                        "error":f"Child process exited with code {completed.returncode}. {diagnostic}",
+                        "output":"", "stderr":"", "metrics":{"process_ms":round((perf_counter()-started)*1000, 3)},
+                        "events":["Worker exited unexpectedly; bounded host diagnostic recorded."]}
             result = json.loads(completed.stdout)
             result["metrics"]["process_ms"] = round((perf_counter()-started)*1000, 3)
             return result

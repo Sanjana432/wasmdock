@@ -1,0 +1,19 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "wasmdock"
+version = "1.0.0"
+description = "Inspectable WebAssembly execution with fuel, memory and capability budgets"
+requires-python = ">=3.11"
+dependencies = ["fastapi==0.165.0", "uvicorn==0.54.0", "wasmtime==50.0.1"]
+
+[project.optional-dependencies]
+test = ["httpx==0.28.1"]
+
+[tool.setuptools.packages.find]
+include = ["wasmdock*"]
+
+[tool.setuptools.package-data]
+wasmdock = ["../plugins/*.wat", "../static/*"]

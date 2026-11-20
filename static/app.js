@@ -53,12 +53,33 @@
     const safe = ['queued', 'running', 'succeeded', 'failed', 'cancelled'].includes(status) ? status : 'neutral';
     return node('span', `status-pill ${safe}`, String(status || 'unknown').toUpperCase());
   }
+  function renderBoundary(job = null) {
+    const budgets = job?.budgets || {
+      fuel: $('fuel').valueAsNumber,
+      memory_mb: $('memory').valueAsNumber,
+      timeout_ms: $('timeout').valueAsNumber,
+      output_limit: $('output-limit').valueAsNumber,
+      workspace: $('workspace-permission').checked
+    };
+    const entries = {
+      fuel: [budgets.fuel, ''],
+      memory: [budgets.memory_mb, ' MiB'],
+      timeout: [budgets.timeout_ms, ' ms'],
+      output: [budgets.output_limit, ' B']
+    };
+    for (const [name, [value, unit]] of Object.entries(entries)) {
+      text('map-' + name, number(value) ? integer(value) + unit : '—');
+    }
+    text('map-capability', budgets.workspace ? '/workspace · read-only' : 'No directory grant');
+    text('envelope-mode', job ? 'Selected job limits' : 'Draft limits');
+  }
   function renderJob(job) {
     state.selected = job;
     $('empty-result').classList.add('hidden');
     $('job-result').classList.remove('hidden');
     $('job-status').className = statusPill(job.status).className;
-    text('job-status', String(job.status || 'unknown').toUpperCase());
+    const label = String(job.status || 'unknown').toUpperCase();
+    if ($('job-status').textContent !== label) text('job-status', label);
     text('job-id', job.id || '—');
     const metrics = job.metrics || {};
     text('job-queue', ms(metrics.queue_ms));
@@ -66,8 +87,9 @@
     text('job-fuel', integer(metrics.fuel_consumed));
     text('job-memory', memory(metrics.memory_bytes));
     text('stdout', job.output || '');
-    text('stderr', job.error || '');
-    $('stderr').classList.toggle('hidden', !job.error);
+    const diagnostics = [job.stderr, job.error].filter(Boolean).join('\n');
+    text('stderr', diagnostics);
+    $('stderr').classList.toggle('hidden', !diagnostics);
     const reason = job.reason ? String(job.reason).replaceAll('_', ' ') : '';
     text('job-reason', reason);
     $('job-reason').classList.toggle('hidden', !reason);
@@ -99,7 +121,11 @@
       const status = node('td'); status.append(statusPill(job.status)); row.append(status);
       row.append(node('td', '', time(job.created_at)), node('td', '', ms(job.metrics?.run_ms)), node('td', '', integer(job.metrics?.fuel_consumed)));
       const action = node('td'); const button = node('button', 'view-job', 'Inspect ↗');
-      button.type = 'button'; button.addEventListener('click', () => { renderJob(job); $('result-panel').scrollIntoView({behavior: 'smooth', block: 'start'}); });
+      button.type = 'button'; button.addEventListener('click', () => {
+        renderJob(job);
+        renderBoundary(job);
+        $('result-panel').scrollIntoView({ block: 'start' });
+      });
       action.append(button); row.append(action); $('history-body').append(row);
     }
   }
@@ -169,11 +195,14 @@
     const tenant = state.tenant;
     try {
       const job = await request('/api/jobs', {method: 'POST', body: JSON.stringify(payload)});
-      if (state.tenant === tenant) { renderJob(job); await refresh(); }
+      if (state.tenant === tenant) { renderJob(job); renderBoundary(job); await refresh(); }
     } catch (error) { notice(error.message); }
     finally { state.busy = false; $('run-button').disabled = false; text('run-label', 'Run plugin'); }
   }
-  $('sample').addEventListener('change', event => applySample(event.target.value));
+  $('sample').addEventListener('change', event => { applySample(event.target.value); renderBoundary(); });
+  for (const id of ['fuel', 'memory', 'timeout', 'output-limit', 'workspace-permission']) {
+    $(id).addEventListener('input', () => renderBoundary());
+  }
   $('wat').addEventListener('input', () => { const current = state.samples.find(s => s.id === $('sample').value); if (current && $('wat').value !== current.wat) $('sample').value = '__custom__'; });
   $('run-button').addEventListener('click', run);
   document.addEventListener('keydown', event => { if ((event.ctrlKey || event.metaKey) && event.key === 'Enter') { event.preventDefault(); run(); } });
@@ -182,11 +211,11 @@
     state.tenant = button.dataset.tenant; state.selected = null; state.jobs = [];
     for (const item of document.querySelectorAll('[data-tenant]')) { const active = item === button; item.classList.toggle('active', active); item.setAttribute('aria-pressed', String(active)); }
     text('history-tenant', state.tenant.toUpperCase()); $('job-result').classList.add('hidden'); $('empty-result').classList.remove('hidden');
-    text('job-status', 'READY'); $('job-status').className = 'status-pill neutral'; notice(''); await refresh();
+    text('job-status', 'READY'); $('job-status').className = 'status-pill neutral'; renderBoundary(); notice(''); await refresh();
   });
   for (const button of document.querySelectorAll('[data-console]')) button.addEventListener('click', () => {
     const tab = button.dataset.console;
-    for (const item of document.querySelectorAll('[data-console]')) { const active = item === button; item.classList.toggle('active', active); item.setAttribute('aria-selected', String(active)); }
+    for (const item of document.querySelectorAll('[data-console]')) { const active = item === button; item.classList.toggle('active', active); item.setAttribute('aria-pressed', String(active)); }
     $('stdout-view').classList.toggle('hidden', tab !== 'stdout'); $('events-view').classList.toggle('hidden', tab !== 'events');
   });
   for (const button of document.querySelectorAll('[data-challenge]')) button.addEventListener('click', () => {
@@ -196,7 +225,8 @@
     $('sample').value = sample.id; applySample(sample.id);
     if (button.dataset.challenge === 'fuel') $('fuel').value = '100000';
     if (button.dataset.challenge === 'memory') $('memory').value = '1';
-    notice(''); $('workspace').scrollIntoView({behavior: 'smooth', block: 'start'}); $('run-button').focus();
+    renderBoundary();
+    notice(''); $('workspace').scrollIntoView({block: 'start'}); $('run-button').focus({preventScroll: true});
   });
   $('refresh-button').addEventListener('click', async () => { notice(''); await refresh(); });
   $('copy-job').addEventListener('click', async () => { if (!state.selected) return; try { await navigator.clipboard.writeText(state.selected.id); } catch (_) { notice('Clipboard access is unavailable. Select the visible job identifier to copy it.'); } });
@@ -206,5 +236,6 @@
     const link = node('a'); link.href = url; link.download = `wasmdock-${String(state.selected.id).replace(/[^a-zA-Z0-9_-]/g, '')}.json`; document.body.append(link); link.click(); link.remove(); setTimeout(() => URL.revokeObjectURL(url), 1000);
   });
   document.addEventListener('visibilitychange', () => { if (!document.hidden) refresh(); });
+  renderBoundary();
   (async () => { try { await loadSamples(); await refresh(); } catch (error) { connection(false); notice(error.message); } finally { schedulePoll(); } })();
 })();

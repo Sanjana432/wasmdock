@@ -3,106 +3,109 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#10181c">
+  <meta name="theme-color" content="#25152f">
   <title>WasmDock — Plugin execution lab</title>
+  <link rel="icon" href="/static/favicon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="/static/style.css">
   <script src="/static/app.js" defer></script>
 </head>
 <body>
-  <aside class="rail" aria-label="Workspace navigation">
-    <a class="brand-mark" href="#top" aria-label="WasmDock home">W<span>▰</span></a>
-    <a class="rail-link active" href="#workspace" title="Execution workspace" aria-label="Execution workspace">⌘</a>
-    <a class="rail-link" href="#history" title="Execution history" aria-label="Execution history">◷</a>
-    <a class="rail-link" href="/docs" target="_blank" rel="noreferrer" title="API documentation" aria-label="API documentation">{ }</a>
-    <span class="rail-bottom" title="Local development workspace">LOCAL</span>
-  </aside>
-
+  <a class="skip" href="#workspace">Skip to the plugin editor</a>
   <div class="shell" id="top">
     <header class="topbar">
-      <a class="wordmark" href="#top">WasmDock<span class="version">EXECUTION LAB</span></a>
-      <div class="header-right">
-        <span class="connection" id="connection"><i></i><span id="connection-text">Connecting</span></span>
-        <a class="text-link api-link" href="/docs" target="_blank" rel="noreferrer">API docs ↗</a>
-      </div>
+      <a class="wordmark" href="#top"><img src="/static/favicon.svg" alt="">WasmDock</a>
+      <nav aria-label="Main navigation"><a href="#workspace">Editor</a><a href="#history">History</a><a href="/docs" target="_blank" rel="noopener">API ↗</a></nav>
+      <span class="connection" id="connection"><i></i><span id="connection-text">Connecting</span></span>
     </header>
-
     <main>
       <section class="intro">
-        <div>
-          <div class="eyebrow"><span class="small-square"></span> WASM PLUGIN PLATFORM</div>
-          <h1>Small plugins.<br><span>Explicit boundaries.</span></h1>
-          <p class="intro-copy">Run real WebAssembly with a fresh store, a resource budget and only the capabilities you grant.</p>
-        </div>
-        <div class="workspace-info">
-          <div class="workspace-label">YOUR WORKSPACE</div>
-          <div class="tenant-picker" role="group" aria-label="Select tenant">
-            <button class="tenant active" data-tenant="alpha" aria-pressed="true"><span class="tenant-dot alpha"></span>Alpha</button>
-            <button class="tenant" data-tenant="beta" aria-pressed="false"><span class="tenant-dot beta"></span>Beta</button>
+        <div class="intro-text">
+          <p class="eyebrow">WEBASSEMBLY EXECUTION LAB</p>
+          <h1>Run a plugin.<br><em>Set its limits.</em></h1>
+          <p class="intro-copy">Write a small module, set its budget, and inspect exactly what happens inside Wasmtime.</p>
+          <div class="workspace-info">
+            <span class="workspace-label">Demo tenant</span>
+            <div class="tenant-picker" role="group" aria-label="Select tenant">
+              <button class="tenant active" data-tenant="alpha" aria-pressed="true"><span class="tenant-dot alpha"></span>Alpha</button>
+              <button class="tenant" data-tenant="beta" aria-pressed="false"><span class="tenant-dot beta"></span>Beta</button>
+            </div>
           </div>
-          <p>Trusted local operator · isolated job records</p>
         </div>
+        <figure class="envelope" aria-labelledby="envelope-title">
+          <div class="envelope-heading"><figcaption id="envelope-title">Execution boundary</figcaption><span id="envelope-mode">Draft limits</span></div>
+          <div class="chip-diagram">
+            <div class="port input-port"><b>IN</b><span>Module + input</span></div>
+            <div class="trace" aria-hidden="true"></div>
+            <div class="chip"><span class="chip-mark" aria-hidden="true">◈</span><b>Wasmtime</b><small>Fresh store per job</small></div>
+            <div class="trace" aria-hidden="true"></div>
+            <div class="port output-port"><b>OUT</b><span>Bounded output</span></div>
+          </div>
+          <dl class="chip-budgets">
+            <div><dt>Fuel</dt><dd id="map-fuel">—</dd></div>
+            <div><dt>Memory</dt><dd id="map-memory">—</dd></div>
+            <div><dt>Timeout</dt><dd id="map-timeout">—</dd></div>
+            <div><dt>Output</dt><dd id="map-output">—</dd></div>
+          </dl>
+          <p class="capability-readout"><b>Filesystem</b><span id="map-capability">No directory grant</span></p>
+        </figure>
       </section>
-
       <section class="metrics-grid" aria-label="Live scheduler metrics">
-        <article class="metric-card"><span class="metric-label">WORKERS</span><strong id="workers">—</strong><span class="metric-foot">bounded concurrency</span><span class="metric-icon">↗</span></article>
-        <article class="metric-card"><span class="metric-label">IN QUEUE</span><strong id="queued">—</strong><span class="metric-foot" id="queue-capacity">waiting for scheduler</span><span class="metric-icon">≋</span></article>
-        <article class="metric-card"><span class="metric-label">RUNNING</span><strong id="running">—</strong><span class="metric-foot">live executions</span><span class="metric-icon mint">◉</span></article>
-        <article class="metric-card"><span class="metric-label">COMPLETED</span><strong id="completed">—</strong><span class="metric-foot">actual terminal jobs</span><span class="metric-icon">✓</span></article>
+        <article class="metric-card"><span class="metric-label">Worker slots</span><strong id="workers">—</strong><span class="metric-foot">Maximum concurrency</span><span class="metric-icon" aria-hidden="true">▥</span></article>
+        <article class="metric-card"><span class="metric-label">In queue</span><strong id="queued">—</strong><span class="metric-foot" id="queue-capacity">Waiting for scheduler</span><span class="metric-icon" aria-hidden="true">≋</span></article>
+        <article class="metric-card"><span class="metric-label">Running</span><strong id="running">—</strong><span class="metric-foot">Active jobs</span><span class="metric-icon" aria-hidden="true">◉</span></article>
+        <article class="metric-card"><span class="metric-label">Finished</span><strong id="completed">—</strong><span class="metric-foot">Succeeded or failed</span><span class="metric-icon" aria-hidden="true">✓</span></article>
       </section>
-
       <div id="notice" class="notice hidden" role="alert"></div>
-
       <section class="workspace-grid" id="workspace">
         <article class="panel composer">
-          <div class="panel-heading"><div><span class="step-number">01</span><h2>Prepare a plugin</h2></div><span class="tag">WAT → WASM</span></div>
+          <div class="panel-heading"><h2>Plugin editor</h2><span class="tag">WAT → WASM</span></div>
           <div class="composer-body">
-            <label class="field-label" for="sample">STARTING POINT</label>
-            <select id="sample" aria-describedby="sample-description"><option value="">Loading runnable samples…</option></select>
-            <p class="field-help sample-description" id="sample-description">Every example runs in the real Wasmtime engine.</p>
-            <div class="code-topline"><label for="wat" class="field-label">PLUGIN SOURCE</label><span>WebAssembly text</span></div>
-            <div class="editor-frame"><div class="editor-gutter" aria-hidden="true">01<br>02<br>03<br>04<br>05<br>06<br>07<br>08<br>09<br>10</div><textarea id="wat" class="code-editor" spellcheck="false" autocapitalize="off" autocomplete="off" aria-label="WebAssembly text plugin source" placeholder="(module …)"></textarea></div>
-            <div class="input-topline"><label class="field-label" for="stdin">STANDARD INPUT</label><span>UTF-8 text</span></div>
-            <textarea id="stdin" class="stdin-input" spellcheck="false" placeholder="Your plugin’s input goes here…"></textarea>
-
-            <div class="limits-heading"><h3>Execution budget</h3><span>applied per job</span></div>
+            <label class="field-label" for="sample">Starting point</label>
+            <select id="sample" aria-describedby="sample-description"><option value="">Loading samples…</option></select>
+            <p class="field-help" id="sample-description"></p>
+            <div class="code-topline"><label for="wat" class="field-label">Plugin source</label><span>WebAssembly text</span></div>
+            <div class="editor-frame"><textarea id="wat" class="code-editor" spellcheck="false" autocapitalize="off" autocomplete="off" aria-label="WebAssembly text plugin source" placeholder="(module …)"></textarea></div>
+            <label class="field-label input-label" for="stdin">Standard input</label>
+            <textarea id="stdin" class="stdin-input" spellcheck="false" placeholder="Text to pass to the plugin"></textarea>
+            <h3 class="limits-heading">Execution budget</h3>
             <div class="limits-grid">
-              <label class="limit-control"><span>Instruction fuel</span><input id="fuel" type="number" min="1000" max="20000000" step="1000" value="1000000"><small>metered Wasm instructions</small></label>
-              <label class="limit-control"><span>Linear memory</span><div class="unit-field"><input id="memory" type="number" min="1" max="64" step="1" value="16"><span>MiB</span></div><small>fresh store limit</small></label>
-              <label class="limit-control"><span>Wall timeout</span><div class="unit-field"><input id="timeout" type="number" min="100" max="5000" step="100" value="2000"><span>ms</span></div><small>execution deadline</small></label>
-              <label class="limit-control"><span>Output budget</span><div class="unit-field"><input id="output-limit" type="number" min="128" max="65536" step="128" value="16384"><span>bytes</span></div><small>bounded captured output</small></label>
+              <label class="limit-control"><span>Instruction fuel</span><input id="fuel" type="number" min="1000" max="50000000" step="1000" value="1000000"></label>
+              <label class="limit-control"><span>Linear memory</span><div class="unit-field"><input id="memory" type="number" min="1" max="64" step="1" value="16"><span>MiB</span></div></label>
+              <label class="limit-control"><span>Execution timeout</span><div class="unit-field"><input id="timeout" type="number" min="100" max="5000" step="1" value="2000"><span>ms</span></div></label>
+              <label class="limit-control"><span>Output budget</span><div class="unit-field"><input id="output-limit" type="number" min="128" max="65536" step="1" value="16384"><span>bytes</span></div></label>
             </div>
-            <label class="capability-control"><input id="workspace-permission" type="checkbox"><span class="check-visual"></span><span><strong>Grant read-only demo workspace</strong><small>Expose the fixture directory as a preopened WASI capability.</small></span><span class="lock-icon">⌑</span></label>
+            <label class="capability-control"><input id="workspace-permission" type="checkbox"><span><strong>Grant read-only demo workspace</strong><small>The plugin can read the sample file in /workspace.</small></span></label>
           </div>
-          <div class="composer-footer"><span class="shortcut"><kbd>Ctrl</kbd> + <kbd>Enter</kbd> to run</span><button class="primary-button" id="run-button"><span id="run-label">Run plugin</span><span>↗</span></button></div>
+          <div class="composer-footer"><span class="shortcut"><kbd>Ctrl</kbd> + <kbd>Enter</kbd></span><button class="primary-button" id="run-button"><span id="run-label">Run plugin</span><span aria-hidden="true">↗</span></button></div>
         </article>
-
         <div class="right-column">
           <article class="panel result-panel" id="result-panel">
-            <div class="panel-heading"><div><span class="step-number">02</span><h2>Inspect the result</h2></div><span class="status-pill neutral" id="job-status">READY</span></div>
-            <div class="empty-state" id="empty-result"><div class="empty-glyph">⌁</div><h3>Your next execution starts here.</h3><p>Choose a sample and run it to inspect output, resource consumption and the execution trail.</p><div class="boundaries"><span>Fresh store</span><span>Fuel metering</span><span>Explicit access</span></div></div>
+            <div class="panel-heading"><h2>Execution result</h2><span class="status-pill neutral" id="job-status" role="status">READY</span></div>
+            <div class="empty-state" id="empty-result"><div class="empty-glyph" aria-hidden="true">↳</div><h3>No result selected</h3><p>Run a plugin or open a past execution to see its output and resource use.</p></div>
             <div class="job-result hidden" id="job-result">
-              <div class="job-meta"><div><span class="field-label">JOB IDENTIFIER</span><code id="job-id">—</code></div><button class="icon-button" id="copy-job" title="Copy job identifier" aria-label="Copy job identifier">⧉</button></div>
-              <div class="result-metrics"><div><span>QUEUE</span><strong id="job-queue">—</strong></div><div><span>RUN TIME</span><strong id="job-time">—</strong></div><div><span>FUEL USED</span><strong id="job-fuel">—</strong></div><div><span>MEMORY</span><strong id="job-memory">—</strong></div></div>
+              <div class="job-meta"><div><span class="field-label">Job identifier</span><code id="job-id">—</code></div><button class="icon-button" id="copy-job" aria-label="Copy job identifier">⧉</button></div>
+              <div class="result-metrics"><div><span>Queue</span><strong id="job-queue">—</strong></div><div><span>Run time</span><strong id="job-time">—</strong></div><div><span>Fuel used</span><strong id="job-fuel">—</strong></div><div><span>Memory</span><strong id="job-memory">—</strong></div></div>
               <div class="reason hidden" id="job-reason"></div>
-              <div class="console-tabs" role="tablist" aria-label="Execution output"><button class="console-tab active" role="tab" aria-selected="true" data-console="stdout">Standard output<span class="tab-dot"></span></button><button class="console-tab" role="tab" aria-selected="false" data-console="events">Execution trail</button><button class="download-button" id="download-result" title="Download result JSON">↓ JSON</button></div>
+              <div class="console-tabs"><button class="console-tab active" aria-pressed="true" data-console="stdout">Output</button><button class="console-tab" aria-pressed="false" data-console="events">Execution trail</button><button class="download-button" id="download-result">↓ JSON</button></div>
               <div class="console-view" id="stdout-view"><pre id="stdout" tabindex="0"></pre><pre class="stderr hidden" id="stderr"></pre></div>
               <div class="console-view hidden" id="events-view"><ol id="event-list" class="event-list"></ol></div>
             </div>
           </article>
-
           <article class="panel challenge-panel">
-            <div class="challenge-title"><span class="small-square"></span><h2>Test the boundaries</h2></div>
-            <p>A useful demo shows what happens when a plugin misbehaves.</p>
-            <div class="challenge-list"><button class="challenge" data-challenge="fuel"><span class="challenge-icon">∞</span><span><strong>Exhaust the fuel budget</strong><small>Interrupt an infinite Wasm loop</small></span><span class="challenge-arrow">↗</span></button><button class="challenge" data-challenge="file"><span class="challenge-icon">⌑</span><span><strong>Request an ungranted file</strong><small>Inspect the WASI permission boundary</small></span><span class="challenge-arrow">↗</span></button><button class="challenge" data-challenge="memory"><span class="challenge-icon">▤</span><span><strong>Push the memory limit</strong><small>Observe controlled allocation failure</small></span><span class="challenge-arrow">↗</span></button></div>
+            <div class="panel-heading"><h2>Test the limits</h2></div>
+            <div class="challenge-list">
+              <button class="challenge" data-challenge="fuel"><span class="challenge-icon" aria-hidden="true">∞</span><span><strong>Exhaust the fuel budget</strong><small>Interrupt an infinite Wasm loop</small></span><span class="challenge-arrow" aria-hidden="true">↗</span></button>
+              <button class="challenge" data-challenge="file"><span class="challenge-icon" aria-hidden="true">⌑</span><span><strong>Request an ungranted file</strong><small>Check the WASI directory permission</small></span><span class="challenge-arrow" aria-hidden="true">↗</span></button>
+              <button class="challenge" data-challenge="memory"><span class="challenge-icon" aria-hidden="true">▤</span><span><strong>Push the memory limit</strong><small>Observe a refused allocation</small></span><span class="challenge-arrow" aria-hidden="true">↗</span></button>
+            </div>
           </article>
         </div>
       </section>
-
       <section class="panel history-panel" id="history">
-        <div class="panel-heading"><div><span class="step-number">03</span><h2>Execution history</h2><span class="tenant-history-label" id="history-tenant">ALPHA</span></div><button class="refresh-button" id="refresh-button"><span>↻</span> Refresh</button></div>
-        <div class="table-scroll"><table><thead><tr><th>JOB</th><th>STATUS</th><th>CREATED</th><th>RUN TIME</th><th>FUEL USED</th><th></th></tr></thead><tbody id="history-body"><tr><td class="table-empty" colspan="6">No executions loaded yet.</td></tr></tbody></table></div>
+        <div class="panel-heading"><div><h2>Execution history</h2><span class="tenant-history-label" id="history-tenant">ALPHA</span></div><button class="refresh-button" id="refresh-button">↻ Refresh</button></div>
+        <div class="table-scroll"><table aria-label="Recent plugin jobs"><thead><tr><th>Job</th><th>Status</th><th>Created</th><th>Run time</th><th>Fuel used</th><th aria-label="Inspect"></th></tr></thead><tbody id="history-body"><tr><td class="table-empty" colspan="6">Fetching executions…</td></tr></tbody></table></div>
       </section>
-      <footer class="footer"><span><span class="footer-dot"></span> Real execution. Measured results.</span><p>Local development lab · Wasmtime runtime · Tenant headers are a demonstration boundary, not authentication.</p></footer>
+      <footer class="footer"><span>Local lab · Tenant selection is for demonstration</span><a href="https://github.com/Sanjana432/wasmdock" target="_blank" rel="noopener">Source on GitHub ↗</a></footer>
     </main>
   </div>
 </body>

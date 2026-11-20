@@ -10,9 +10,9 @@ A working WebAssembly execution laboratory with a browser control plane, real WA
 
 The host is Python/FastAPI. The plugins execute as WebAssembly in Wasmtime; their transformations and failures are not simulated. WAT source examples compile through Wasmtime’s actual `wat2wasm` API, so a Rust toolchain is optional.
 
-![WasmDock execution dashboard](docs/dashboard.jpg)
+The dashboard shows the execution boundary from input to output. Its diagram displays the draft limits while you edit and the recorded limits when you run or inspect a job.
 
-[View the mobile layout](docs/mobile.jpg).
+Earlier interface screenshots are available for [desktop](docs/dashboard.jpg) and [mobile](docs/mobile.jpg).
 
 ## What you can demonstrate
 

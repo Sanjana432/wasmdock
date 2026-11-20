@@ -1,5 +1,7 @@
 # Architecture
 
+Compilation is serial within each job. The bounded worker slots control concurrency; small guest modules do not create additional parallel compiler pools. The host records a bounded stderr diagnostic if a child exits unexpectedly.
+
 ```mermaid
 flowchart LR
     U[Browser dashboard] --> A[FastAPI validation and body budget]

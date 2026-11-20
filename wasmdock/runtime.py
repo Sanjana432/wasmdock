@@ -15,6 +15,9 @@ def execute(spec: JobSpec, tenant="alpha") -> dict:
     config.consume_fuel = True
     config.epoch_interruption = True
     config.wasm_threads = False
+    # A bounded process-per-job lab should not start a compiler pool per guest.
+    # The small plugin modules compile serially inside their existing job slot.
+    config.parallel_compilation = False
     engine = wasmtime.Engine(config)
     captured, stderr = bytearray(), bytearray()
     output_exceeded = False

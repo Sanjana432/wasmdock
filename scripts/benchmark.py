@@ -58,7 +58,7 @@ def main():
                           "run_ms":result["metrics"]["run_ms"], "output_bytes":result["metrics"]["output_bytes"]}
     payload = {"measured_at":datetime.now(timezone.utc).isoformat(), "platform":platform.platform(), "python":platform.python_version(),
                "wasmtime":importlib.metadata.version("wasmtime"), "runs":args.runs,
-               "method":"Fresh Engine/Store per execution; all timings include module compilation. Process measurements additionally include Python startup and queue waiting. Small samples are descriptive, not capacity claims.",
+               "method":"Fresh Engine/Store per execution with serial module compilation; all timings include compilation. Process measurements additionally include Python startup and queue waiting. Small samples are descriptive, not capacity claims.",
                "direct_execution":summarize(timings),
                "child_process":summarize([r["metrics"]["process_ms"] for r in results]),
                "queue_wait":summarize([r["metrics"]["queue_ms"] for r in results]),

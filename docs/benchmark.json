@@ -1,57 +1,57 @@
 {
-  "measured_at": "2026-11-20T10:15:05.960897+00:00",
+  "measured_at": "2026-11-20T10:32:29.648060+00:00",
   "platform": "Windows-11-10.0.26200-SP0",
   "python": "3.12.14",
   "wasmtime": "50.0.1",
   "runs": 12,
-  "method": "Fresh Engine/Store per execution; all timings include module compilation. Process measurements additionally include Python startup and queue waiting. Small samples are descriptive, not capacity claims.",
+  "method": "Fresh Engine/Store per execution with serial module compilation; all timings include compilation. Process measurements additionally include Python startup and queue waiting. Small samples are descriptive, not capacity claims.",
   "direct_execution": {
-    "min_ms": 6.183,
-    "median_ms": 6.752,
-    "p95_ms": 34.862,
-    "max_ms": 34.862
+    "min_ms": 5.102,
+    "median_ms": 6.356,
+    "p95_ms": 16.163,
+    "max_ms": 16.163
   },
   "child_process": {
-    "min_ms": 1119.717,
-    "median_ms": 1260.489,
-    "p95_ms": 1706.723,
-    "max_ms": 1706.723
+    "min_ms": 1249.443,
+    "median_ms": 1335.414,
+    "p95_ms": 1488.388,
+    "max_ms": 1488.388
   },
   "queue_wait": {
-    "min_ms": 1.123,
-    "median_ms": 3078.26,
-    "p95_ms": 6364.203,
-    "max_ms": 6364.203
+    "min_ms": 0.53,
+    "median_ms": 3614.855,
+    "p95_ms": 7065.906,
+    "max_ms": 7065.906
   },
-  "batch_elapsed_seconds": 8.257,
-  "batch_jobs_per_second": 1.453,
+  "batch_elapsed_seconds": 8.507,
+  "batch_jobs_per_second": 1.411,
   "boundary_checks": {
     "infinite-loop": {
       "status": "failed",
       "reason": "fuel_exhausted",
       "exit_code": 0,
-      "run_ms": 14.689,
+      "run_ms": 10.436,
       "output_bytes": 0
     },
     "memory-grow": {
       "status": "failed",
       "reason": "guest_exit",
       "exit_code": 78,
-      "run_ms": 10.869,
+      "run_ms": 10.963,
       "output_bytes": 51
     },
     "workspace-read": {
       "status": "failed",
       "reason": "guest_exit",
       "exit_code": 77,
-      "run_ms": 9.961,
+      "run_ms": 9.907,
       "output_bytes": 45
     },
     "output-flood": {
       "status": "failed",
       "reason": "output_limit",
       "exit_code": 0,
-      "run_ms": 21.975,
+      "run_ms": 20.5,
       "output_bytes": 256
     }
   }

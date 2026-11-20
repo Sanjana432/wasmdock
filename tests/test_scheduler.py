@@ -28,8 +28,10 @@ class SchedulerTests(unittest.TestCase):
         alpha = scheduler.submit("alpha", JobSpec(sample_id="infinite-loop", fuel=50_000))
         beta = scheduler.submit("beta", JobSpec(sample_id="uppercase", stdin="healthy"))
         self.assertIsNone(scheduler.get("beta", alpha["id"]))
-        self.assertEqual(scheduler.wait("alpha", alpha["id"])["reason"], "fuel_exhausted")
-        self.assertEqual(scheduler.wait("beta", beta["id"])["output"], "HEALTHY")
+        alpha_result = scheduler.wait("alpha", alpha["id"])
+        beta_result = scheduler.wait("beta", beta["id"])
+        self.assertEqual(alpha_result["reason"], "fuel_exhausted", alpha_result)
+        self.assertEqual(beta_result["output"], "HEALTHY", beta_result)
         self.assertEqual(len(scheduler.list("alpha")), 1)
 
     def test_round_robin_prevents_one_tenant_draining_queue(self):
